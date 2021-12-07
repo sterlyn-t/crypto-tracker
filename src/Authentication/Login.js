@@ -3,11 +3,23 @@ import { Box, TextField, Button } from '@material-ui/core';
 import { CryptoState } from '../CryptoContext';
 import { signInWithEmailAndPassword } from '@firebase/auth';
 import { auth } from '../firebase';
+import { Classnames } from 'react-alice-carousel';
+import { makeStyles } from '@material-ui/core/styles';
+
+const useStyles = makeStyles({
+    text: {
+        //color: "white",
+        backgroundColor: "black"
+    }
+});
+
 const Login = ({ handleClose }) => {
 
     const [email, setEmail] = useState("");
     const [password, setPassword] = useState("");
     const { setAlert } = CryptoState();
+
+    const classes = useStyles();
 
     const handleSubmit = async () => {
         if (!email || !password){
@@ -50,6 +62,7 @@ const Login = ({ handleClose }) => {
         value={email}
         onChange={(e) => setEmail(e.target.value)}
         fullWidth
+        className={classes.textfield}
         />
         <TextField
         variant="outlined"
@@ -58,6 +71,7 @@ const Login = ({ handleClose }) => {
         value={password}
         onChange={(e) => setPassword(e.target.value)}
         fullWidth
+        className={classes.textfield}
         />
         <Button
         variant="contained"

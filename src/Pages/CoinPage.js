@@ -9,6 +9,11 @@ import ReactHtmlParser from 'react-html-parser';
 import { numberWithCommas } from '../components/Banner/Carousel';
 import { doc, setDoc } from '@firebase/firestore';
 import { db } from '../firebase';
+import TransactionModal from '../components/TransactionModal';
+import BuyModal from '../components/BuyModal';
+import SellModal from '../components/SellModal';
+
+
 const CoinPage = () => {
     const { id } = useParams();
     const [coin, setCoin] = useState();
@@ -74,6 +79,18 @@ const CoinPage = () => {
         }
     }));
 
+    // const addToPortfolio = async() => {
+    //   const userRef = doc(db,"userInfo", user.uid);
+
+    //   try{
+    //     await setDoc(userRef,
+    //       {coins: [coin?.id],
+    //        accountBalance: coin?.
+    //       }
+    //       )
+    //   }
+    // }
+    
     const inWatchlist = watchlist.includes(coin?.id);
     const addToWatchlist = async() => {
       const coinRef = doc(db,"watchlist", user.uid);
@@ -118,6 +135,25 @@ const CoinPage = () => {
           });
       }
     };
+
+
+    const [modalState, setModalState] = useState(false);
+    const toggleModal = () => {
+       setModalState(!modalState);
+       return modalState;
+    }
+
+    // buy
+    const addToPortfolio = async() => {
+
+    }
+
+    // sell
+    const removeFromPortfolio = async() => {
+
+    }
+
+
 
     const classes = useStyles();
     if(!coin) return <LinearProgress style={{ backgroundColor: "gold"}} />;
@@ -190,6 +226,8 @@ const CoinPage = () => {
               </Typography>
             </span>
             {user && (
+              <div>
+              <TransactionModal coin={coin}/>
               <Button
               variant="outlined"
               style={{
@@ -201,6 +239,7 @@ const CoinPage = () => {
               >
                 {inWatchlist? "Remove from Watchlist" : "Add to Watchlist"}
               </Button>
+              </div>
             )}
           </div>
         </div>

@@ -4,8 +4,7 @@ import Modal from '@material-ui/core/Modal';
 import Backdrop from '@material-ui/core/Backdrop';
 import Fade from '@material-ui/core/Fade';
 import { AppBar, Button, Tabs, Tab, Box } from '@material-ui/core';
-import Login from './Login';
-import Signup from './Signup';
+
 import GoogleButton from 'react-google-button';
 import { GoogleAuthProvider, signInWithPopup } from '@firebase/auth';
 import { auth } from '../firebase';
@@ -21,8 +20,7 @@ const useStyles = makeStyles((theme) => ({
       color: "white",
       borderRadius: 10,
       width: 400,
-      //backgroundColor: theme.palette.background.paper,
-      backgroundColor: "white"
+      backgroundColor: theme.palette.background.paper,
   },
   google: {
       padding: 24,
@@ -36,7 +34,7 @@ const useStyles = makeStyles((theme) => ({
 
 }));
 
-export default function AuthModal() {
+export default function BuyModal() {
   const classes = useStyles();
   const [open, setOpen] = React.useState(false);
 
@@ -55,41 +53,21 @@ export default function AuthModal() {
   };
 
   const { setAlert } = CryptoState();
-  const googleProvider = new GoogleAuthProvider();
-
-  const signInWithGoogle = () => {
-    signInWithPopup(auth, googleProvider)
-    .then(res => {
-        setAlert({
-            open: true,
-            message: `Sign Up Successful. Welcome ${res.user.email}`,
-            type: "success"
-        });
-        handleClose();
-    }).catch((error) => {
-        setAlert({
-            open: true,
-            message: error.message,
-            type: "error"
-        });
-        return;
-    })
-  }
 
   return (
     <div>
-      <Button
-        variant="contained"
-        style={{
-          width: 85,
-          height: 40,
-          marginLeft: 15,
-          backgroundColor: "#EEBC1D",
-        }}
-        onClick={handleOpen}
-      >
-        Login
-      </Button>
+              <Button
+              variant="outlined"
+              style={{
+                width: "47%",
+                height: 40,
+                marginBottom: 10,
+                backgroundColor: "#EEBC1D"
+              }}
+              onClick={handleOpen}
+              >
+                 Buy
+              </Button>
       <Modal
         aria-labelledby="transition-modal-title"
         aria-describedby="transition-modal-description"
@@ -107,8 +85,8 @@ export default function AuthModal() {
             <AppBar
               position="static"
               style={{
-                backgroundColor: "black",
-                color: "black",
+                backgroundColor: "transparent",
+                color: "white",
               }}
             >
               <Tabs
@@ -117,18 +95,19 @@ export default function AuthModal() {
                 variant="fullWidth"
                 style={{ borderRadius: 10 }}
               >
-                <Tab label="Login" style={{color: "white"}}/>
-                <Tab label="Sign Up" style={{color: "white"}}/>
+                <Tab label="Login" />
+                <Tab label="Sign Up" />
               </Tabs>
             </AppBar>
-            {value === 0 && <Login handleClose={handleClose} />}
-            {value === 1 && <Signup handleClose={handleClose} />}
+            {/* {value === 0 && <Login handleClose={handleClose} />}
+            {value === 1 && <Signup handleClose={handleClose} />} */}
 
             <Box className={classes.google}>
                 <span>OR</span>
                 <GoogleButton 
                  style={{ width: "100%", outline: "none"}}
-                 onClick={signInWithGoogle}/>
+                 //onClick={signInWithGoogle}
+                 />
             </Box>
           </div>
         </Fade>

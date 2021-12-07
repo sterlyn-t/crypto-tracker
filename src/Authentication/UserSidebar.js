@@ -1,4 +1,4 @@
-import React from 'react';
+import React, {useState, useEffect} from 'react';
 import clsx from 'clsx';
 import { makeStyles } from '@material-ui/core/styles';
 import Drawer from '@material-ui/core/Drawer';
@@ -9,9 +9,12 @@ import { signOut } from '@firebase/auth';
 import { auth } from '../firebase';
 import { numberWithCommas } from '../components/Banner/Carousel';
 import { AiFillDelete }  from 'react-icons/ai';
-import { doc, setDoc } from '@firebase/firestore';
+import { doc, getDoc, setDoc, onSnapshot } from '@firebase/firestore';
 import { db } from '../firebase'; 
-
+import { IoAddSharp } from 'react-icons/io5';
+import { IoMdAddCircle } from "react-icons/io";
+import { TextField, InputAdornment } from '@material-ui/core';
+import { BsCheck } from 'react-icons/bs';
 
 const useStyles = makeStyles({
     container: {
@@ -66,7 +69,19 @@ const useStyles = makeStyles({
       alignItems: "center",
       backgroundColor: "#EEBC1D",
       boxShadow: "0 0 3px black"
-    }
+    },
+    availableFunds: {
+      flex: 1,
+      width: "100%",
+      backgroundColor: "grey",
+      borderRadius: 10,
+      padding: 15,
+      paddingTop: 10,
+      display: "flex",
+      flexDirection: "column",
+      alginItems: "center",
+      gap: 12,
+  },
 });
 
 
@@ -77,6 +92,49 @@ export default function UserSidebar() {
   });
 
   const { user, setAlert, watchlist, coins, symbol } = CryptoState();
+
+  const [addedFunds, setAddedFunds] = useState(0);
+  const [toggleFundsInput, setToggleFundsInput] = useState(false);
+  const toggleInput = (event) => {
+    setToggleFundsInput(true);
+    setAddedFunds(event.target.value);
+  }
+
+  const [initialAccountBalance, setInitialAccountBalance] = useState(0);
+
+  useEffect(() => {
+    if (user) {
+        const userRef = doc(db, "userInfo", user.uid);
+        //Checking if database is updated 
+        var unsubscribe = onSnapshot(userRef, user => {
+            if(user.exists()) {
+                setInitialAccountBalance(user.data().accountBalance);
+            } else {
+                console.log("No items in the watchlist");
+            }
+        });
+        return () => {
+            unsubscribe();
+        };
+    };
+}, [user]);
+
+  const addFunds = async(event) => {
+   const userRef = doc(db, "userInfo", user.uid);
+   const newAccountBalance = parseFloat(addedFunds) + parseFloat(initialAccountBalance);
+    try {
+      await setDoc(userRef,
+           {accountBalance: newAccountBalance
+            },
+         { merge: "true" }
+        );
+        setTimeout(() => {
+          setToggleFundsInput(false);
+        }, 1000);
+    } catch(error) {
+
+    }
+  }
 
   const removeFromWatchlist = async(coin) => {
     const coinRef = doc(db,"watchlist", user.uid);
@@ -112,17 +170,14 @@ export default function UserSidebar() {
 
   const logOut = () => {
     signOut(auth);
-
     setAlert({
         open: true,
         type: "success",
         message: "Logout Successful !"
     });
-
     toggleDrawer();
 };
   
-
   return (
     <div>
       {['right'].map((anchor) => (
@@ -157,9 +212,51 @@ export default function UserSidebar() {
                 >
                     {user.displayName || user.email}
                 </span>
-                    <div className={classes.watchList}> 
-                        <span style={{ fontSize: 15, textShadow: "0 0 5px black"}}>Watchlist</span>
-
+                <div className={classes.availableFunds}>
+                <span
+                style={{
+                  fontSize: 15, textShadow: "0 0 5px black"
+                }}
+                >
+                    Available Funds
+                </span>
+                <div className={classes.coin}>
+                                <span>Dollars</span>
+                                {toggleFundsInput === false ? 
+                                <span style={{ display: "flex", gap: 8}}>
+                                  {symbol}
+                                  {numberWithCommas(parseFloat(initialAccountBalance).toFixed(2))}
+                                  <IoMdAddCircle 
+                                   style={{ cursor: "pointer"}}
+                                   fontSize = "16"
+                                   onClick={(e) => toggleInput(e)}
+                                   />
+                                </span> : 
+                                  <span style={{ display: "flex", gap: 8, fontSize: 15}}>
+                                  {/* {symbol} */}
+                                  {/* {addedFunds} */}
+                                   <TextField 
+                                    display= "inline-block"
+                                    placeholder="Enter Amount"
+                                    style={{width: "50%", position: 'relative', left: 70, fontSize: 15, onFocus: {color: "black"}}}
+                                    onChange={(e) => toggleInput(e)}
+                                    InputProps={{
+                                      endAdornment:(
+                                      <InputAdornment position= "end">
+                                      <BsCheck 
+                                      style={{ cursor: "pointer"}}
+                                      fontSize = "24"
+                                      onClick={(e) => addFunds(e)}
+                                      />
+                                      </InputAdornment> )
+                                    }}
+                                   />
+                                </span>
+                                }
+                              </div>
+                </div>
+                <div className={classes.watchList}> 
+                        <span style={{ fontSize: 15, textShadow: "0 0 5px black"}}>Portfolio</span>
                           {coins.map(coin => {
                             if(watchlist.includes(coin.id))
                             return (
@@ -177,7 +274,26 @@ export default function UserSidebar() {
                               </div>
                             )
                           })}
-
+                    </div>
+                    <div className={classes.watchList}> 
+                        <span style={{ fontSize: 15, textShadow: "0 0 5px black"}}>Watchlist</span>
+                          {coins.map(coin => {
+                            if(watchlist.includes(coin.id))
+                            return (
+                              <div className={classes.coin}>
+                                <span>{coin.name}</span>
+                                <span style={{ display: "flex", gap: 8}}>
+                                  {symbol}
+                                  {numberWithCommas(coin.current_price.toFixed(2))}
+                                  <AiFillDelete 
+                                   style={{ cursor: "pointer"}}
+                                   fontSize = "16"
+                                   onClick={() => removeFromWatchlist(coin)}
+                                   />
+                                </span>
+                              </div>
+                            )
+                          })}
                     </div>
                 </div>
                 <Button
