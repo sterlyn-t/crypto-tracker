@@ -121,9 +121,21 @@ export default function BuyModal({ coin }) {
 
   const [transactionType, setTransactionType] = useState("");
   const handleBuy = async(event) => {
-    setDollars(dollars);
+
+    if (initialAccountBalance <= 0 || dollars > initialAccountBalance){
+        setAlert({
+            open: true,
+            message: `In sufficient funds available.`,
+            type: "error"
+        });
+        setTimeout(() => {
+            handleClose();
+        }, 2000);
+    }
+    else {
     setTransactionType("buy");
-    const balanceRemaining = dollars;
+    const updatedBalance = parseFloat(initialAccountBalance) - parseFloat(dollars);
+    console.log("entered: " + dollars);
     const userRef = doc(db, "userInfo", user.uid);
 
     const data = {
@@ -136,7 +148,7 @@ export default function BuyModal({ coin }) {
 
     try{
         await setDoc(userRef,
-            {accountBalance: dollars,
+            {accountBalance: updatedBalance,
              portfolioInfo: [data]
             },
             { merge: "true" }
@@ -159,16 +171,17 @@ export default function BuyModal({ coin }) {
     }
   }
 }
-
+}
+    const [initialAccountBalance, setInitialAccountBalance] = useState(0);
   useEffect(() => {
     if (user) {
         const userRef = doc(db, "userInfo", user.uid);
         //Checking if database is updated 
         var unsubscribe = onSnapshot(userRef, user => {
             if(user.exists()) {
-                setDollars(user.data().accountBalance);
+                setInitialAccountBalance(user.data().accountBalance);
             } else {
-                console.log("No items in the watchlist");
+                console.log("No user found");
             }
         });
         return () => {
@@ -237,17 +250,16 @@ export default function BuyModal({ coin }) {
             <TextField 
             label=""
             placeholder=""
-            defaultValue={dollars}
+            defaultValue={initialAccountBalance}
             type="number"
             className={classes.textField}
             style={{backgroundColor: "white", position: "relative"}}
             onChange={renderCoinQuantity}
             />
-            <Typography variant="subtitle1">{dollars}</Typography>
+            <Typography variant="subtitle1">{initialAccountBalance}</Typography>
             </Box>
             <Box style={{      padding: 24,
                                 paddingTop: 0,
-                                //display: "flex",
                                 flexDirection: "column",
                                 textAlign: "center",
                                 gap: 20,
