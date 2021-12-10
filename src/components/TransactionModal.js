@@ -55,9 +55,10 @@ export default function BuyModal({ coin }) {
   const [open, setOpen] = React.useState(false);
   const [buyPrice, setBuyPrice] = useState(null);
   const [dollars, setDollars] = useState(0);
-
-
   const [transaction, setTransaction] = useState("");
+  const { setAlert, coins, symbol, currency, user, portfolio } = CryptoState();
+
+
   const handleOpen = (transaction) => {
     if(transaction === "buy"){
         setTransaction("buy");
@@ -88,6 +89,9 @@ export default function BuyModal({ coin }) {
      // Incorporating a spread fee of 1.75%
     setBuyPrice(numberWithCommas(((1.75/100)*currentPrice + currentPrice).toFixed(2)));
     setSellPrice(numberWithCommas((currentPrice - (1.75/100)*currentPrice ).toFixed(2)));
+
+    // Determining the inital coin quantity that a user can buy depending on their 
+    // initial account balance
   }, []);
 
 
@@ -108,16 +112,34 @@ export default function BuyModal({ coin }) {
       let quantity = (((event.target.value)*currentPrice)).toFixed(2);
       quantity = (quantity - (1.75/100)*quantity).toFixed(2);
       if (event.target.value === ""){
-          setCoinQuantity(0);
+          setCoinQuantity(initialCoinQuantity);
       } else {
           setCoinQuantity((event.target.value));
       }
       setDollarQuantity(quantity);
   }
 
-  const { setAlert, coins, symbol, currency, user, portfolio } = CryptoState();
 
   const inPortfolio = portfolio.includes(coin?.id);
+  const addToPortfolio = async() => {
+  const coinRef = doc(db,"userInfo", user.uid);
+
+    try{
+      await setDoc(coinRef, 
+        {coins:portfolio?[...portfolio,coin?.id] : [coin?.id] });
+        setAlert({
+          open: true,
+          message: `${coin.name} added to your portfolio !`,
+          type: "success"
+        })
+    } catch(error) {
+        setAlert({
+          open: true,
+          message: error.message,
+          type: "error"
+        });
+    }
+   };
 
   const [transactionType, setTransactionType] = useState("");
   const handleBuy = async(event) => {
@@ -133,46 +155,50 @@ export default function BuyModal({ coin }) {
         }, 2000);
     }
     else {
-    setTransactionType("buy");
-    const updatedBalance = parseFloat(initialAccountBalance) - parseFloat(dollars);
-    console.log("entered: " + dollars);
-    const userRef = doc(db, "userInfo", user.uid);
+        setTransactionType("buy");
+        const updatedBalance = parseFloat(initialAccountBalance) - parseFloat(dollars);
+        console.log("entered: " + dollars);
+        const userRef = doc(db, "userInfo", user.uid);
 
-    const data = {
+        const data = {
         coinId: coin?.id,
         coinQuantity: coinQuantity,
         transactionType: transactionType
-    };
+        };
 
-    if (dollars !== null){
+        if (dollars !== null){
 
-    try{
-        await setDoc(userRef,
-            {accountBalance: updatedBalance,
-             portfolioInfo: [data]
-            },
-            { merge: "true" }
-            );
-            setAlert({
+            try{
+                await setDoc(userRef,
+                {accountBalance: updatedBalance,
+                portfolioInfo: [data]
+                },
+                { merge: "true" }
+                );
+                setAlert({
                 open: true,
                 message: `Successfully bought ${coinQuantity} ${coin.name} !`,
                 type: "success"
-              });
-            setTimeout(() => {
-                handleClose();
-            }, 1000);
+                });
+                setTimeout(() => {
+                    handleClose();
+                }, 1000);
             
-    } catch (error){
-        setAlert({
-            open: true,
-            message: error.message,
-            type: "error"
-          });
+            } catch (error){
+                setAlert({
+                open: true,
+                message: error.message,
+                type: "error"
+                });
+            }
+        }   
     }
-  }
 }
-}
+    // Initial account dollar balance
     const [initialAccountBalance, setInitialAccountBalance] = useState(0);
+    // Initial quantity of coins that can be bought
+    const [initialCoinQuantity, setInitialCoinQuantity] = useState(0);
+    // Initial account coin balance 
   useEffect(() => {
     if (user) {
         const userRef = doc(db, "userInfo", user.uid);
@@ -180,6 +206,8 @@ export default function BuyModal({ coin }) {
         var unsubscribe = onSnapshot(userRef, user => {
             if(user.exists()) {
                 setInitialAccountBalance(user.data().accountBalance);
+                setInitialCoinQuantity(parseFloat(user.data().accountBalance)/parseFloat(currentPrice));
+                setCoinQuantity(initialCoinQuantity);
             } else {
                 console.log("No user found");
             }

@@ -61,6 +61,24 @@ const CryptoContext = ({children}) => {
         };
     }, [user]);
 
+    useEffect(() => {
+        if (user) {
+            const portfolioRef = doc(db, "userInfo", user.uid);
+            //Checking if database is updated 
+            var unsubscribe = onSnapshot(portfolioRef, coin => {
+                if(coin.exists()) {
+                    console.log("the data i need: " + coin.data());
+                    setPortfolio(coin.data().portfolioInfo);
+                } else {
+                    console.log("No items in the portfolio");
+                }
+            });
+            return () => {
+                unsubscribe();
+            };
+        };
+    }, [user]);
+
     return (
         <Crypto.Provider value={{currency, symbol, setCurrency, coins, loading, fetchCoins, alert, setAlert, user, watchlist, portfolio }}> 
             {children}

@@ -18,7 +18,7 @@ const CoinPage = () => {
     const { id } = useParams();
     const [coin, setCoin] = useState();
 
-    const {currency, symbol, user, watchlist, setAlert} = CryptoState();
+    const {currency, symbol, user, watchlist, setAlert, portfolio} = CryptoState();
     const fetchCoin = async () => {
         const { data } = await axios.get(SingleCoin(id));
         setCoin(data);
@@ -78,18 +78,6 @@ const CoinPage = () => {
 
         }
     }));
-
-    // const addToPortfolio = async() => {
-    //   const userRef = doc(db,"userInfo", user.uid);
-
-    //   try{
-    //     await setDoc(userRef,
-    //       {coins: [coin?.id],
-    //        accountBalance: coin?.
-    //       }
-    //       )
-    //   }
-    // }
     
     const inWatchlist = watchlist.includes(coin?.id);
     const addToWatchlist = async() => {
@@ -141,16 +129,6 @@ const CoinPage = () => {
     const toggleModal = () => {
        setModalState(!modalState);
        return modalState;
-    }
-
-    // buy
-    const addToPortfolio = async() => {
-
-    }
-
-    // sell
-    const removeFromPortfolio = async() => {
-
     }
 
 

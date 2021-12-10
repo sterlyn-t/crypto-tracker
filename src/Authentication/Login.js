@@ -8,12 +8,16 @@ import { makeStyles } from '@material-ui/core/styles';
 
 const useStyles = makeStyles({
     text: {
-        //color: "white",
-        backgroundColor: "black"
+        //backgroundColor: "black"
+    },
+    textfield: {
+        outline: "solid 1px white",
+       // color: "black",
     }
 });
 
-const Login = ({ handleClose }) => {
+
+const Login = ({ handleClose, props }) => {
 
     const [email, setEmail] = useState("");
     const [password, setPassword] = useState("");
@@ -51,27 +55,31 @@ const Login = ({ handleClose }) => {
             return;
         }
     }
-
+    const inputStyle = { WebkitBoxShadow: "0 0 0 1000px white inset" };
     return (
         <Box p={3}
              style={{ display: "flex", flexDirection: "column", gap: "20px"}}>
         <TextField
         variant="outlined"
         type="email"
-        label="Enter Email"
+        //label="Enter Email"
+        placeholder="Enter Email"
         value={email}
         onChange={(e) => setEmail(e.target.value)}
         fullWidth
         className={classes.textfield}
+        autoFocus
         />
         <TextField
         variant="outlined"
         type="password"
-        label="Enter Password"
+        //label="Enter Password"
+        placeholder="Enter Password"
         value={password}
         onChange={(e) => setPassword(e.target.value)}
         fullWidth
         className={classes.textfield}
+        onFocus
         />
         <Button
         variant="contained"

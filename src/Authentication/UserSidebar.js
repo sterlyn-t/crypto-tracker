@@ -91,7 +91,7 @@ export default function UserSidebar() {
     right: false,
   });
 
-  const { user, setAlert, watchlist, coins, symbol } = CryptoState();
+  const { user, setAlert, watchlist, coins, symbol, portfolio } = CryptoState();
 
   const [addedFunds, setAddedFunds] = useState(0);
   const [toggleFundsInput, setToggleFundsInput] = useState(false);
@@ -258,7 +258,7 @@ export default function UserSidebar() {
                 <div className={classes.watchList}> 
                         <span style={{ fontSize: 15, textShadow: "0 0 5px black"}}>Portfolio</span>
                           {coins.map(coin => {
-                            if(watchlist.includes(coin.id))
+                            if(portfolio.includes(coin.id))
                             return (
                               <div className={classes.coin}>
                                 <span>{coin.name}</span>

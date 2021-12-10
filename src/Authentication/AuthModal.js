@@ -18,11 +18,12 @@ const useStyles = makeStyles((theme) => ({
     justifyContent: 'center',
   },
   paper: {
-      color: "white",
+      //color: "white",
       borderRadius: 10,
       width: 400,
       //backgroundColor: theme.palette.background.paper,
-      backgroundColor: "white"
+      backgroundColor: "black",
+      color: "black"
   },
   google: {
       padding: 24,

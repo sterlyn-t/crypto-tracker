@@ -3,6 +3,7 @@ import { Box, Button, TextField } from '@material-ui/core';
 import React, { useState } from 'react';
 import { CryptoState } from '../CryptoContext';
 import { auth } from '../firebase';
+import { makeStyles } from '@material-ui/core/styles';
 
 const Signup = ({ handleClose }) => {
 
@@ -11,6 +12,15 @@ const Signup = ({ handleClose }) => {
     const [confirmPassword, setConfirmPassword] = useState("");
     const { setAlert } = CryptoState();
 
+    const useStyles = makeStyles({
+        text: {
+            backgroundColor: "black"
+        },
+        textfield: {
+            outline: "solid 1px white",
+        }
+    });
+    const classes = useStyles();
     const handleSubmit = async () => {
         if(password !== confirmPassword) {
             setAlert({
@@ -45,26 +55,35 @@ const Signup = ({ handleClose }) => {
         <TextField
         variant="outlined"
         type="email"
-        label="Enter Email"
+        //label="Enter Email"
+        placeholder="Enter Email"
         value={email}
         onChange={(e) => setEmail(e.target.value)}
         fullWidth
+        className={classes.textfield}
+        autoFocus
         />
         <TextField
         variant="outlined"
         type="password"
-        label="Enter Password"
+        //label="Enter Password"
+        placeholder="Enter Password"
         value={password}
         onChange={(e) => setPassword(e.target.value)}
         fullWidth
+        className={classes.textfield}
+        onFocus
         />
         <TextField
         variant="outlined"
         type="password"
-        label="Confirm Password"
+        //label="Confirm Password"
+        placeholder="Confirm Password"
         value={confirmPassword}
         onChange={(e) => setConfirmPassword(e.target.value)}
         fullWidth
+        className={classes.textfield}
+        onFocus
         />
         <Button
         variant="contained"
